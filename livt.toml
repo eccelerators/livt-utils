@@ -1,0 +1,17 @@
+[project]
+name = "Livt.Utils"
+version = "0.1.0"
+path = "src"
+outdir = "out"
+
+[tests]
+path = "tests"
+components = [
+    "Crc32Test"
+]
+
+[build.debug]
+warnings = ["all", "no-variable-divisor"]
+
+[build.release]
+warnings = ["all"]
