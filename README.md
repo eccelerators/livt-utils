@@ -5,7 +5,7 @@ packages. It is intended for practical helpers that are broadly useful but do
 not belong in `Livt.Base`, `Livt.IO`, `Livt.Math`, `Livt.Crypto`, or a more
 specific domain package.
 
-The 0.1.0 package surface is intentionally small:
+The 1.0.1 package surface is intentionally small:
 
 - `Livt.Utils.Hashing.Crc32`: CRC32 checksum component using the IEEE 802.3 /
   zlib reflected polynomial `0xEDB88320`.
@@ -14,7 +14,7 @@ The 0.1.0 package surface is intentionally small:
 
 ```toml
 [dependencies]
-Livt.Utils = "0.1.0"
+Livt.Utils = "1.0.1"
 ```
 
 `Livt.Utils` currently has no package dependencies.
@@ -56,7 +56,7 @@ complete 16-byte block. Call `ProcessFinalBlock()` exactly once for the final
 `GetByte(idx)`.
 
 `GetByte(0)` returns the least-significant CRC byte and `GetByte(3)` returns
-the most-significant CRC byte. The current 0.1.0 behavior returns byte 3 for
+the most-significant CRC byte. The current 1.0.1 behavior returns byte 3 for
 `GetByte(idx)` when `idx` is outside `0..3`.
 
 ## 🧪 Build and Test
