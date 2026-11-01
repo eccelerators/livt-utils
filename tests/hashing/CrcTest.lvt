@@ -1,0 +1,76 @@
+namespace Livt.Utils.Tests.Hashing
+
+using Livt.Utils.Hashing
+
+/**
+ * Published check values exercise small/large widths and both bit directions.
+ */
+@Test
+component CrcTest
+{
+	// Independent compile-time profiles; helpers own no running state.
+	crc5: Crc<5, 0x05, true>
+	crc16: Crc<16, 0x8005, true>
+	crc32: Crc
+	ccitt: Crc<16, 0x1021, false>
+	parity: Crc<1, 1, true>
+	forwardParity: Crc<1, 1, false>
+
+	/**
+	 * Constructs the profile specializations.
+	 */
+	new()
+	{
+		crc5 = new Crc<5, 0x05, true>()
+		crc16 = new Crc<16, 0x8005, true>()
+		crc32 = new Crc()
+		ccitt = new Crc<16, 0x1021, false>()
+		parity = new Crc<1, 1, true>()
+		forwardParity = new Crc<1, 1, false>()
+	}
+
+	/**
+	 * Check strings use independent CRC-5/USB, CRC-16/USB, CRC-32/ISO-HDLC and
+	 * CRC-16/IBM-3740 vectors; the latter exercises non-reflected operation.
+	 */
+	@Test
+	fn CheckProfiles()
+	{
+		var input: byte[9] = [0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39]
+		var five: logic[5] = 0x1F
+		var sixteen: logic[16] = 0xFFFF
+		var thirtyTwo: logic[32] = 0xFFFFFFFF
+		var forward: logic[16] = 0xFFFF
+
+		for (var index = 0; index < 9; index++) {
+			five = crc5.UpdateByte(five, input[index])
+			sixteen = crc16.UpdateByte(sixteen, input[index])
+			thirtyTwo = crc32.UpdateByte(thirtyTwo, input[index])
+			forward = ccitt.UpdateByte(forward, input[index])
+		}
+
+		assert crc5.Finalize(five, 0x1F, false) == 0x19
+		assert crc16.Finalize(sixteen, 0xFFFF, false) == 0xB4C8
+		assert crc32.Finalize(thirtyTwo, 0xFFFFFFFF, false) == 0xCBF43926
+		assert forward == 0x29B1
+		assert ccitt.Finalize(forward, 0, true) == 0x8D94
+	}
+
+	/**
+	 * A token covers eleven bits, not two padded bytes. Empty data CRC is zero.
+	 */
+	@Test
+	fn CheckBitUpdatesAndEmpty()
+	{
+		var token: logic[5] = 0x1F
+
+		for (var index = 0; index < 11; index++) {
+			token = crc5.UpdateBit(token, false)
+		}
+
+		assert crc5.Finalize(token, 0x1F, false) == 0x02
+		assert crc16.Finalize(0xFFFF, 0xFFFF, false) == 0
+		assert parity.UpdateByte(0, 0x01) == 1
+		assert forwardParity.UpdateByte(0, 0x03) == 0
+	}
+}

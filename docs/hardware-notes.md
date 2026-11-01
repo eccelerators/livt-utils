@@ -1,5 +1,17 @@
 # Livt.Utils Hardware Notes
 
+## Generic CRC
+
+`Crc` specializes combinational logic for the selected width, polynomial and
+bit order. It owns no accumulator registers, clock, lookup table or RAM; the
+caller supplies any state and enables updates when input is accepted.
+
+`UpdateByte()` combines eight bit updates. `UpdateBits()` supports up to 32 bits;
+constant counts allow synthesis to eliminate unused steps. These helpers have no
+scheduled-call handshake, but their combinational delay contributes to the
+caller's timing path. Resource usage and achievable clock rate depend on the
+selected profile, call sites and synthesis target.
+
 ## CRC32
 
 `Crc32` is a stateful checksum component. It stores a 32-bit accumulator as four

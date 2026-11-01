@@ -1,0 +1,110 @@
+namespace Livt.Utils.Hashing
+
+/**
+ * Pure CRC updates, specialized at compile time; no storage, clock or lookup RAM.
+ * POLYNOMIAL uses normal notation without its leading x^WIDTH term. REFLECTED
+ * selects a right-shifting register and least-significant input bit first.
+ * The caller owns the running state and supplies the profile's initial value.
+ * Finalize applies optional register reflection followed by XOR_OUT; it does not
+ * choose wire byte order. Never feed a finalized value back into UpdateByte.
+ */
+component Crc<WIDTH: int = 32, POLYNOMIAL: uint = 0x04C11DB7, REFLECTED: bool = true>
+{
+	static assert WIDTH >= 1 && WIDTH <= 32, "CRC width must be 1 through 32"
+	static assert POLYNOMIAL != 0, "CRC polynomial must be nonzero"
+	static assert ((POLYNOMIAL as logic[WIDTH]) as uint) == POLYNOMIAL, "CRC polynomial must fit its width"
+
+	/**
+	 * Reverses exactly WIDTH bits, independent of byte boundaries.
+	 */
+	public fn Reflect[](value: logic[WIDTH]) logic[WIDTH]
+	{
+		var result: logic[WIDTH] = 0
+
+		for (var index = 0; index < WIDTH; index++) {
+			result = (result << 1) | ((value >> index) & 1)
+		}
+
+		return result
+	}
+
+	/**
+	 * Advances by one bit supplied in transmission order.
+	 */
+	public fn UpdateBit[](crc: logic[WIDTH], value: bool) logic[WIDTH]
+	{
+		var polynomial = POLYNOMIAL as logic[WIDTH]
+		var feedback = ((crc >> (WIDTH - 1)) & 1) != 0
+		var next = crc << 1
+
+		if (REFLECTED) {
+			polynomial = Reflect(polynomial)
+			feedback = (crc & 1) != 0
+			next = crc >> 1
+		}
+
+		if (feedback != value) {
+			next = next ^ polynomial
+		}
+
+		return next
+	}
+
+	/**
+	 * Advances by eight bits; reflection selects input bit order as well as state.
+	 */
+	public fn UpdateByte[](crc: logic[WIDTH], value: byte) logic[WIDTH]
+	{
+		var next = crc
+
+		for (var index = 0; index < 8; index++) {
+			var shift = 7 - index
+
+			if (REFLECTED) {
+				shift = index
+			}
+
+			next = UpdateBit(next, (((value as uint) >> shift) & 1) != 0)
+		}
+
+		return next
+	}
+
+	/**
+	 * Advances by count bits (0..32) of value, starting at its least-significant
+	 * bit for reflected profiles or bit count-1 otherwise. No byte padding.
+	 */
+	public fn UpdateBits[](crc: logic[WIDTH], value: uint, count: int) logic[WIDTH]
+	{
+		var next = crc
+
+		for (var index = 0; index < 32; index++) {
+			var shift = count - 1 - index
+
+			if (REFLECTED) {
+				shift = index
+			}
+
+			if (index < count && count <= 32) {
+				next = UpdateBit(next, ((value >> shift) & 1) != 0)
+			}
+		}
+
+		return next
+	}
+
+	/**
+	 * Produces a checksum without changing the caller's running state.
+	 * reverse reverses the current register orientation, not the input bytes.
+	 */
+	public fn Finalize[](crc: logic[WIDTH], xorOut: logic[WIDTH], reverse: bool) logic[WIDTH]
+	{
+		var result = crc
+
+		if (reverse) {
+			result = Reflect(result)
+		}
+
+		return result ^ xorOut
+	}
+}

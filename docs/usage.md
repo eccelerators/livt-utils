@@ -1,5 +1,16 @@
 # Livt.Utils Usage
 
+## Choosing a CRC interface
+
+Use `Crc` for configurable widths and polynomials with caller-owned state.
+Initialize the accumulator at the start of each message, pass its raw value to
+`UpdateBit()`, `UpdateByte()` or `UpdateBits()`, and apply `Finalize()` when the
+message is complete. The [generic CRC guide](crc.md) contains a configuration
+example and explains reflection and final XOR.
+
+Use `Crc32` for stateful CRC-32/ISO-HDLC processing through its scheduled 16-byte
+block API. Its usage is unchanged in 1.1.0; the following examples use that API.
+
 ## CRC32 for One Short Message
 
 ```livt

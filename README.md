@@ -5,8 +5,10 @@ packages. It is intended for practical helpers that are broadly useful but do
 not belong in `Livt.Base`, `Livt.IO`, `Livt.Math`, `Livt.Crypto`, or a more
 specific domain package.
 
-The 1.0.2 package surface is intentionally small:
+Version 1.1.0 provides:
 
+- `Livt.Utils.Hashing.Crc`: generic bit/byte CRC helpers with compile-time width,
+  polynomial and bit-order configuration; see [CRC contracts](docs/crc.md).
 - `Livt.Utils.Hashing.Crc32`: CRC32 checksum component using the IEEE 802.3 /
   zlib reflected polynomial `0xEDB88320`.
 
@@ -14,10 +16,11 @@ The 1.0.2 package surface is intentionally small:
 
 ```toml
 [dependencies]
-Livt.Utils = "1.0.2"
+"Livt.Utils" = "1.1.0"
 ```
 
-`Livt.Utils` currently has no package dependencies.
+`Livt.Utils` has no package dependencies. See [CHANGELOG.md](CHANGELOG.md)
+for release notes.
 
 ## 📚 Namespaces
 
@@ -26,9 +29,28 @@ that shape below `Livt.Utils.Tests`.
 
 | Namespace | Component | Synthesizable | Purpose |
 |---|---|---|---|
+| `Livt.Utils.Hashing` | `Crc` | Yes | Combinational CRC updates; caller-owned state |
 | `Livt.Utils.Hashing` | `Crc32` | Yes | CRC32 checksum over 16-byte blocks |
 
 ## 🔌 API Overview
+
+### Generic CRC
+
+New in 1.1.0, `Crc<WIDTH = 32, POLYNOMIAL = 0x04C11DB7, REFLECTED = true>`
+provides combinational `UpdateBit()`, `UpdateByte()` and `UpdateBits()` helpers,
+plus `Reflect()` and `Finalize()`. Widths from 1 through 32 bits are supported.
+Supply the polynomial in normal notation without its leading term, including
+when selecting reflected processing.
+
+The caller owns and initializes the accumulator. The component owns no clock,
+running state, lookup table or RAM. Initialization, final XOR and checksum byte
+order are explicit caller choices. The default specialization can calculate
+CRC-32/ISO-HDLC when seeded with `0xFFFFFFFF` and finalized with XOR
+`0xFFFFFFFF` and `reverse = false`.
+
+Use `Crc` when the caller controls updates bit by bit or byte by byte; use
+`Crc32` for the existing stateful 16-byte block interface. See the
+[generic CRC guide](docs/crc.md) for configuration and finalization rules.
 
 ### CRC32
 
@@ -56,7 +78,7 @@ complete 16-byte block. Call `ProcessFinalBlock()` exactly once for the final
 `GetByte(idx)`.
 
 `GetByte(0)` returns the least-significant CRC byte and `GetByte(3)` returns
-the most-significant CRC byte. The current 1.0.2 behavior returns byte 3 for
+the most-significant CRC byte. `Crc32` returns byte 3 for
 `GetByte(idx)` when `idx` is outside `0..3`.
 
 ## 🧪 Build and Test
@@ -81,9 +103,10 @@ live in [`docs/usage.md`](docs/usage.md). Hardware notes live in
 
 ## 🚧 Outlook
 
-Future additions may include CRC32C, CRC16 variants, Adler-32, Fletcher
+Future additions may include named CRC profile presets, Adler-32, Fletcher
 checksums, byte-order helpers, and other small utilities that are reusable
-across Livt packages.
+across Livt packages. The generic `Crc` already supports configurable CRC16
+and CRC32 polynomials, including CRC32C.
 
 ## 📄 License
 
