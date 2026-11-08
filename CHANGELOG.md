@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.1.1
+
+### Added
+
+- Publish package discovery metadata, the README, the changelog, and the MIT
+  license with this version.
+
+### Compatibility
+
+- No component API or dependency changes from 1.1.0.
+
 ## 1.1.0
 
 ### Added

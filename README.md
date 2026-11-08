@@ -5,7 +5,7 @@ packages. It is intended for practical helpers that are broadly useful but do
 not belong in `Livt.Base`, `Livt.IO`, `Livt.Math`, `Livt.Crypto`, or a more
 specific domain package.
 
-Version 1.1.0 provides:
+Version 1.1.1 provides:
 
 - `Livt.Utils.Hashing.Crc`: generic bit/byte CRC helpers with compile-time width,
   polynomial and bit-order configuration; see [CRC contracts](docs/crc.md).
@@ -16,8 +16,11 @@ Version 1.1.0 provides:
 
 ```toml
 [dependencies]
-"Livt.Utils" = "1.1.0"
+"Livt.Utils" = "1.1.1"
 ```
+
+Version 1.1.1 publishes package discovery metadata, this README, the changelog,
+and the MIT license. Its component API is unchanged from 1.1.0.
 
 `Livt.Utils` has no package dependencies. See [CHANGELOG.md](CHANGELOG.md)
 for release notes.

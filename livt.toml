@@ -1,8 +1,21 @@
 [project]
 name = "Livt.Utils"
-version = "1.1.0"
+version = "1.1.1"
+description = "Reusable Livt utility components, including configurable CRC helpers and CRC32."
+authors = ["Denis Vasilík"]
+repository = "https://github.com/eccelerators/livt-utils"
+homepage = "https://github.com/eccelerators/livt-utils"
+keywords = ["fpga", "utilities", "crc", "crc32", "hashing"]
+license = "MIT"
 path = "src"
 outdir = "out"
+
+[publish]
+files = ["README.md", "CHANGELOG.md", "LICENSE"]
+
+[project.organization]
+name = "Eccelerators GmbH"
+website = "https://eccelerators.com"
 
 [tests]
 path = "tests"
